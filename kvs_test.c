@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "kvs.h"
 
 typedef struct {
@@ -40,13 +42,39 @@ int main(int argc, char* argv[]) {
 	player_record = add_kv(player_record, r2_kv);
 
 	print_vals(player_record);
-
-	// write to file 
+	printf("write to file\n");
 	out(player_record, "data");
+	free(player_record);
+	player_record = NULL;
 
-	printf("--------\n");
-
-	// read from file
+	printf("\nread from file\n");
 	Kvs_t* players = in("data");
 	print_vals(players);
+
+	Record_t r3;
+	r3.id = 3;
+	r3.play_total = 100;
+	r3.win_total = 700;
+	Kv_t* r3_kv = kv(r3.id, &r3, sizeof(r3));
+	players = add_kv(players, r3_kv);
+	
+	printf("\nadd one to cache\n");
+	print_vals(players);
+
+	printf("\nremove one from cache\n");
+	remove_kv(players, 2);
+	print_vals(players);
+
+	printf("\nwrite to file\n");
+	out(players, "data");
+
+	free(players);
+	players = NULL;
+
+	printf("\nread from file\n");
+	Kvs_t* players_another = in("data");
+	print_vals(players_another);
+
+	free(players_another);
+	players_another = NULL;
 }
