@@ -9,19 +9,15 @@ typedef struct {
 	int win_total;
 }Record_t;
 
-void print_record(Record_t* r) {
-	printf("%d %d %d \n", r -> id, r -> play_total, r -> win_total);
+char* record_to_string(Value_t r) {
+	Record_t* pr = (Record_t*)r;
+	char* buf = malloc(32);
+	snprintf(buf, 32, "%d %d %d\n", pr -> id, pr -> play_total, pr -> win_total);
+	return buf;
 }
 
-void print_val(Kv_t* kv) {
-	printf("%ld: ", kv -> key);
-	print_record((Record_t *)(kv -> value));
-}
-
-void print_vals(Kvs_t* kvs) {
-	for(int i = 0; i < kvs -> count; i++) {
-		print_val(kvs -> kv[i]);
-	}
+char* records_to_string(Kvs_t* kvs) {
+	return kvs_to_string(kvs, record_to_string);
 }
 
 int main(int argc, char* argv[]) {
@@ -41,15 +37,21 @@ int main(int argc, char* argv[]) {
 	Kv_t* r2_kv = make_kv(r2.id, &r2, sizeof(r2));
 	player_record = add_kv(player_record, r2_kv);
 
-	print_vals(player_record);
+	
+	char* s0 = records_to_string(player_record);
+	printf("%s", s0);
+
 	printf("write to file\n");
 	out(player_record, "data");
+
 	free(player_record);
 	player_record = NULL;
 
 	printf("\nread from file\n");
 	Kvs_t* players = in("data");
-	print_vals(players);
+	
+	char* s1 = records_to_string(players);
+	printf("%s", s1);
 
 	Record_t r3;
 	r3.id = 3;
@@ -59,11 +61,13 @@ int main(int argc, char* argv[]) {
 	players = add_kv(players, r3_kv);
 	
 	printf("\nadd one to cache\n");
-	print_vals(players);
+	char* s3 = records_to_string(players);
+	printf("%s", s3);
 
 	printf("\nremove one from cache\n");
 	remove_kv(players, 2);
-	print_vals(players);
+	char* s4 = records_to_string(players);
+	printf("%s", s4);
 
 	printf("\nwrite to file\n");
 	out(players, "data");
@@ -73,7 +77,8 @@ int main(int argc, char* argv[]) {
 
 	printf("\nread from file\n");
 	Kvs_t* players_another = in("data");
-	print_vals(players_another);
+	char* s5 = records_to_string(players_another);
+	printf("%s", s5);
 
 	free(players_another);
 	players_another = NULL;
