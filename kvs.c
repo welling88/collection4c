@@ -12,6 +12,7 @@
 #include "kvs.h"
 
 #define EMPTY_COUNT 16
+#define KVS_STR_SIZE 128
 
 static Kvs_t* init_with_capacity(int capacity) {
 	Kvs_t* kvs = malloc(sizeof(Kvs_t) + capacity * sizeof(Kv_t *));
@@ -37,7 +38,7 @@ Kv_t* find_kv(Kvs_t* kvs, Key_t key) {
 	return NULL;		
 }
 
-Kv_t* get_kv(Kvs_t*, int index) {
+Kv_t* get_kv(Kvs_t* kvs, int index) {
 	if(index < 0 || index >= kvs -> count) {
 		return NULL;
 	}
@@ -55,6 +56,10 @@ bool update_kv(Kvs_t* kvs, Kv_t* kv) {
 } 
 
 Kvs_t* add_kv(Kvs_t* kvs, Kv_t* kv) {
+	if(kvs == NULL) {
+		kvs = init_kvs();
+	}
+
 	if(kvs -> usable_key <= kv -> key) {
 		kvs -> usable_key = kv -> key + 1;
 	}
@@ -105,7 +110,7 @@ void remove_kv(Kvs_t* kvs, Key_t key) {
 	kvs -> count = kvs -> count - 1;
 }
 
-Kv_t* kv(Key_t key, Value_t value, size_t val_size) {
+Kv_t* make_kv(Key_t key, Value_t value, size_t val_size) {
 	Kv_t* keyval = malloc(sizeof(Kv_t));
 	keyval -> key = key;
 	
@@ -139,15 +144,19 @@ bool out(Kvs_t* kvs, const char* path) {
 }
 
 Kvs_t* in(const char* path) {
+	Kvs_t* kvs = init_kvs();
+
 	FILE* instream;
 	if ((instream = fopen(path, "rb")) == NULL) {
-		return NULL;
+		return kvs;
 	}
-	
-	Kvs_t* kvs = init_kvs();
 
 	int count;
 	fread(&count, sizeof(int), 1, instream);
+	if(count <= 0) {
+		fclose(instream);
+		return kvs;
+	}
 
 	Key_t key;
 	size_t size;
@@ -158,9 +167,32 @@ Kvs_t* in(const char* path) {
 		Value_t value = malloc(size);
 		fread(value, size, 1, instream);
 
-		kvs = add_kv(kvs, kv(key, value, size));
+		kvs = add_kv(kvs, make_kv(key, value, size));
 	}
 
 	fclose(instream);
 	return kvs;
 }
+
+char* kvs_to_string(Kvs_t* kvs, char* (*kv_to_string)(Value_t)) {
+	char* buf = malloc(KVS_STR_SIZE);
+
+	int buf_size = KVS_STR_SIZE;
+
+	int c = snprintf(buf, KVS_STR_SIZE, "count=%d, capacity=%d\n", kvs -> count, kvs -> capacity);
+	for(int i = 0; i < kvs -> count; i++) {
+		char* kv_str = kv_to_string(kvs -> kv[i] -> value);
+		int len = strlen(kv_str) + 1;
+		if(buf_size - c < len) {
+			char* buf_new = malloc(buf_size + KVS_STR_SIZE);
+			buf_size += KVS_STR_SIZE;
+
+			memcpy(buf_new, buf, c);
+			buf = buf_new;
+		}
+		strncat(buf, kv_str, len);
+		c += len;
+	}
+	return buf;
+}
+

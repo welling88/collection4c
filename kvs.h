@@ -4,6 +4,7 @@
  * since: 2016-1-11
  * doc: 定义一个管理键值对<key, value>对象，键为长整型，而值为通用类型
  */
+#include <stdlib.h>
 #include <stdbool.h>
 
 #ifndef KVS_H
@@ -59,7 +60,7 @@ void remove_kv(Kvs_t* kvs, Key_t key);
 /**
  * 创建一个键值对
  */
-Kv_t* kv(Key_t key, Value_t value, size_t val_size);
+Kv_t* make_kv(Key_t key, Value_t value, size_t val_size);
 
 /**
  * 将键值对写入到二进制文件中
@@ -67,8 +68,13 @@ Kv_t* kv(Key_t key, Value_t value, size_t val_size);
 bool out(Kvs_t* kvs, const char* path);
 
 /**
- * 从二进制文件中读取数据到内存中
+ * 从二进制文件中读取数据到内存中( 如果文件不存在或者读取错误，会返回初始化好的kvs对象，count=0)
  */
 Kvs_t* in(const char* path);
+
+/**
+ * 返回kvs对象的字符串表示
+ */
+char* kvs_to_string(Kvs_t* kvs, char* (*value_to_string)(Value_t));
 
 #endif

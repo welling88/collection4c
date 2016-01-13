@@ -31,14 +31,14 @@ int main(int argc, char* argv[]) {
 	r1.id = 1;
 	r1.play_total = 1000;
 	r1.win_total = 300;
-	Kv_t* r1_kv = kv(r1.id, &r1, sizeof(r1));
+	Kv_t* r1_kv = make_kv(r1.id, &r1, sizeof(r1));
 	player_record = add_kv(player_record, r1_kv);
 	
 	Record_t r2;
 	r2.id = 2;
 	r2.play_total = 900;
 	r2.win_total = 500;
-	Kv_t* r2_kv = kv(r2.id, &r2, sizeof(r2));
+	Kv_t* r2_kv = make_kv(r2.id, &r2, sizeof(r2));
 	player_record = add_kv(player_record, r2_kv);
 
 	print_vals(player_record);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 	r3.id = 3;
 	r3.play_total = 100;
 	r3.win_total = 700;
-	Kv_t* r3_kv = kv(r3.id, &r3, sizeof(r3));
+	Kv_t* r3_kv = make_kv(r3.id, &r3, sizeof(r3));
 	players = add_kv(players, r3_kv);
 	
 	printf("\nadd one to cache\n");
