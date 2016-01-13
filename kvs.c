@@ -37,6 +37,13 @@ Kv_t* find_kv(Kvs_t* kvs, Key_t key) {
 	return NULL;		
 }
 
+Kv_t* get_kv(Kvs_t*, int index) {
+	if(index < 0 || index >= kvs -> count) {
+		return NULL;
+	}
+	return (Kv_t *)kvs -> kv[index];
+}
+
 bool update_kv(Kvs_t* kvs, Kv_t* kv) {
 	Kv_t* kv_raw = find_kv(kvs, kv -> key);
 	if(kv_raw == NULL) return false;

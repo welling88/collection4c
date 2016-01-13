@@ -32,9 +32,14 @@ typedef struct {
 Kvs_t* init_kvs();
 
 /**
- * 从指针对象池中查找键为key的元素
+ * 从指针对象池中查找键为key的元素; 没找到会返回NULL
  */
 Kv_t* find_kv(Kvs_t* kvs, Key_t key);
+
+/**
+ * 从对象池中查找第index个元素( index <- [0, kvs -> count) ), 没找到会返回NULL
+ */
+Kv_t* get_kv(Kvs_t* kvs, int index);
 
 /**
  * 更新一个对象
@@ -42,7 +47,7 @@ Kv_t* find_kv(Kvs_t* kvs, Key_t key);
 bool update_kv(Kvs_t* kvs, Kv_t* kv);
 
 /**
- * 添加一个新对象或者在已存在键的时候更新这个对象
+ * 添加一个新对象或者在已存在键的时候更新这个对象(kvs对象有可能会切换到新地址)
  */
 Kvs_t* add_kv(Kvs_t* kvs, Kv_t* kv);
 
