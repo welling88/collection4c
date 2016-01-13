@@ -4,7 +4,7 @@
  * since: 2016-1-11
  * doc: 定义一个管理键值对<key, value>对象，键必须为长整型，而值为通用类型
  */
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
@@ -109,3 +109,51 @@ Kv_t* kv(Key_t key, Value_t value, size_t val_size) {
 	return keyval;
 }
 
+bool out(Kvs_t* kvs, const char* path) {
+	FILE* outstream;
+	if ((outstream = fopen(path, "wb")) == NULL) {
+		return false;
+	}
+
+	int count = kvs -> count;
+	fwrite(&count, sizeof(int), 1, outstream);
+
+	size_t size;
+	for(int i = 0; i < kvs -> count; i++) {
+		Key_t key = kvs -> kv[i] -> key;
+		fwrite(&key, sizeof(Key_t), 1, outstream);
+		size = kvs -> kv[i] -> size;
+		fwrite(&size, sizeof(size_t), 1, outstream);
+		fwrite(kvs -> kv[i] -> value, size, 1, outstream);
+	}
+
+	fclose(outstream);
+	return true;
+}
+
+Kvs_t* in(const char* path) {
+	FILE* instream;
+	if ((instream = fopen(path, "rb")) == NULL) {
+		return NULL;
+	}
+	
+	Kvs_t* kvs = init_kvs();
+
+	int count;
+	fread(&count, sizeof(int), 1, instream);
+
+	Key_t key;
+	size_t size;
+	for(int i = 0; i < count; i++) {
+		fread(&key, sizeof(Key_t), 1, instream);
+		fread(&size, sizeof(size_t), 1, instream);
+
+		Value_t value = malloc(size);
+		fread(value, size, 1, instream);
+
+		kvs = add_kv(kvs, kv(key, value, size));
+	}
+
+	fclose(instream);
+	return kvs;
+}

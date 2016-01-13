@@ -56,5 +56,14 @@ void remove_kv(Kvs_t* kvs, Key_t key);
  */
 Kv_t* kv(Key_t key, Value_t value, size_t val_size);
 
+/**
+ * 将键值对写入到二进制文件中
+ */
+bool out(Kvs_t* kvs, const char* path);
+
+/**
+ * 从二进制文件中读取数据到内存中
+ */
+Kvs_t* in(const char* path);
 
 #endif
